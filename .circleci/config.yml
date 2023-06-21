@@ -124,7 +124,13 @@ jobs:
       - restore_cache:
           keys:
             - frontend-build
-      # Your job code here
+      - run: 
+          name: frontend scan for security vulnerabilities
+          command: |
+            cd frontend
+            npm install
+            ## npm install oauth-sign@^0.9.0
+            npm audit --audit-level=critical
 
   scan-backend:
     docker:
@@ -134,7 +140,13 @@ jobs:
       - restore_cache:
           keys:
             - backend-build
-      # Your job code here
+      - run: 
+          name: backend scan for security vulnerabilities
+          command: |
+            cd backend
+            npm install
+            ## npm install oauth-sign@^0.9.0
+            npm audit --audit-level=critical
 
   deploy-infrastructure:
     docker:
