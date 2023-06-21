@@ -1,10 +1,27 @@
 version: 2.1
 
+parameters:
+  image_aws_cli:
+    type: string
+    default: "amazon/aws-cli:latest"
+  image_node:
+    # https://hub.docker.com/r/cimg/node/tags
+    type: string
+    default: "circleci/node:13.8.0"
+  image_ansible:
+    type: string
+    default: "alpinelinux/ansible:latest"
+  image_alpine:
+    type: string
+    default: "cimg/base:2023.03"
+
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
-      # Add parameter here   
+      home_path:
+        type: string
+        default: "~/"
     steps:
       - run:
           name: Destroy environments
@@ -16,7 +33,9 @@ commands:
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
-      # Add parameter here     
+      home_path:
+        type: string
+        default: "~/"
     steps:
       - run:
           name: Revert migrations
@@ -35,7 +54,7 @@ commands:
 jobs:
   build-frontend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: << image_node >> 
     steps:
       - checkout
       - restore_cache:
@@ -43,15 +62,16 @@ jobs:
       - run:
           name: Build front-end
           command: |
-            # Your code here
-            exit 1
+            cd frontend
+            npm install
+            npm run build
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
 
   build-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: << image_node >> 
     steps:
       - checkout
       - restore_cache:
@@ -59,54 +79,63 @@ jobs:
       - run:
           name: Back-end build
           command: |
-             # Your code here
-             exit 1
+            cd backend
+            npm install
+            npm run build
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
 
   test-frontend:
     docker:
-      # Docker image here
+      - image: << image_node >>
     steps:
-      # Checkout code from git
-      # Restore from cache
+      - checkout
+      - restore_cache:
+          keys:
+            - frontend-build
       # Your job code here
                 
   test-backend:
     docker:
-      # Docker image here
+      - image: << image_node >>
     steps:
-      # Checkout code from git
-      # Restore from cache
+      - checkout
+      - restore_cache:
+          keys:
+            - backend-build
       # Your job code here
             
   scan-frontend:
     docker:
-      # Docker image here
+      - image: << image_node >>
     steps:
-      # Checkout code from git
-      # Restore from cache
+      - checkout
+      - restore_cache:
+          keys:
+            - frontend-build
       # Your job code here
 
   scan-backend:
     docker:
-      # Docker image here
+      - image: << image_node >>
     steps:
-      # Checkout code from git
-      # Restore from cache
+      - checkout
+      - restore_cache:
+          keys:
+            - backend-build
       # Your job code here
 
   deploy-infrastructure:
     docker:
-      # Docker image here that supports AWS CLI
+      - image: << image_aws_cli >>
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
-              --template-file .circleci/files/backend.yml \
+              --template-file .circleci/files/backend.yml # \
               #--tags project=your-tag \
               # --stack-name "your back-end stack name with workflow id" \
               # --parameter-overrides ID="your workflow id"  
@@ -115,7 +144,7 @@ jobs:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
-              --template-file .circleci/files/frontend.yml \
+              --template-file .circleci/files/frontend.yml # \
               #--tags project=your-tag \
               # --stack-name "your front-end stack name with workflow id" \
               # --parameter-overrides ID="your workflow id"  
@@ -133,7 +162,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      # Docker image here that supports Ansible
+      - image: << image_ansible >> 
     steps:
       # Checkout code from git
       # Add ssh keys with fingerprint
@@ -152,9 +181,9 @@ jobs:
 
   run-migrations:
     docker:
-      # Docker image here that supports NodeJS
+      - image: << image_node >> 
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Run migrations
           command: |
@@ -169,9 +198,9 @@ jobs:
 
   deploy-frontend:
     docker:
-      # Docker image here that supports AWS CLI
+      - image: << image_aws_cli >>
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
@@ -190,9 +219,9 @@ jobs:
                     
   deploy-backend:
     docker:
-      # Docker image here that supports Ansible
+      - image: << image_ansible >>
     steps:
-      # Checkout code from git
+      - checkout
       # Add ssh keys with fingerprint
       # attach workspace
       - run:
@@ -207,9 +236,9 @@ jobs:
 
   smoke-test:
     docker:
-      # Lightweight Docker image 
+      - image: << image_alpine >>
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
@@ -230,9 +259,9 @@ jobs:
 
   cloudfront-update:
     docker:
-      # Docker image here that supports AWS CLI
+      - image: << image_aws_cli >> 
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
@@ -243,11 +272,11 @@ jobs:
             # your code here
       # Here's where you will add some code to rollback on failure  
 
-cleanup:
+  cleanup:
     docker:
-      # Docker image here
+      - image: << image_aws_cli >> 
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Get old stack workflow id
           command: |
