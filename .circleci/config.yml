@@ -54,7 +54,7 @@ commands:
 jobs:
   build-frontend:
     docker:
-      - image: << image_node >> 
+      - image: << parameters.image_node >> 
     steps:
       - checkout
       - restore_cache:
@@ -71,7 +71,7 @@ jobs:
 
   build-backend:
     docker:
-      - image: << image_node >> 
+      - image: << parameters.image_node >> 
     steps:
       - checkout
       - restore_cache:
@@ -88,7 +88,7 @@ jobs:
 
   test-frontend:
     docker:
-      - image: << image_node >>
+      - image: << parameters.image_node >>
     steps:
       - checkout
       - restore_cache:
@@ -98,7 +98,7 @@ jobs:
                 
   test-backend:
     docker:
-      - image: << image_node >>
+      - image: << parameters.image_node >>
     steps:
       - checkout
       - restore_cache:
@@ -108,7 +108,7 @@ jobs:
             
   scan-frontend:
     docker:
-      - image: << image_node >>
+      - image: << parameters.image_node >>
     steps:
       - checkout
       - restore_cache:
@@ -118,7 +118,7 @@ jobs:
 
   scan-backend:
     docker:
-      - image: << image_node >>
+      - image: << parameters.image_node >>
     steps:
       - checkout
       - restore_cache:
@@ -128,7 +128,7 @@ jobs:
 
   deploy-infrastructure:
     docker:
-      - image: << image_aws_cli >>
+      - image: << parameters.image_aws_cli >>
     steps:
       - checkout
       - run:
@@ -162,7 +162,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: << image_ansible >> 
+      - image: << parameters.image_ansible >> 
     steps:
       # Checkout code from git
       # Add ssh keys with fingerprint
@@ -181,7 +181,7 @@ jobs:
 
   run-migrations:
     docker:
-      - image: << image_node >> 
+      - image: << parameters.image_node >> 
     steps:
       - checkout
       - run:
@@ -198,7 +198,7 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: << image_aws_cli >>
+      - image: << parameters.image_aws_cli >>
     steps:
       - checkout
       - run:
@@ -219,7 +219,7 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: << image_ansible >>
+      - image: << parameters.image_ansible >>
     steps:
       - checkout
       # Add ssh keys with fingerprint
@@ -236,7 +236,7 @@ jobs:
 
   smoke-test:
     docker:
-      - image: << image_alpine >>
+      - image: << parameters.image_alpine >>
     steps:
       - checkout
       - run:
@@ -259,7 +259,7 @@ jobs:
 
   cloudfront-update:
     docker:
-      - image: << image_aws_cli >> 
+      - image: << parameters.image_aws_cli >> 
     steps:
       - checkout
       - run:
@@ -274,7 +274,7 @@ jobs:
 
   cleanup:
     docker:
-      - image: << image_aws_cli >> 
+      - image: << parameters.image_aws_cli >> 
     steps:
       - checkout
       - run:
