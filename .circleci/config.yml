@@ -134,6 +134,7 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
       - slack/notify:
+          # check context in workflows.default.jobs with SLACK_ACCESS_TOKEN, SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1
           mentions: "@Vitalii Cherkashyn"
@@ -155,6 +156,7 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
       - slack/notify:
+          # check context in workflows.default.jobs with SLACK_ACCESS_TOKEN, SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1
 
@@ -335,8 +337,12 @@ workflows:
           requires: [build-backend]
       - scan-backend:
           requires: [build-backend]
+          context:
+            - slack-config
       - scan-frontend:
           requires: [build-frontend]
+          context:
+            - slack-config
       - deploy-infrastructure:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
