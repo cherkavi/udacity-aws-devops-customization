@@ -116,7 +116,10 @@ jobs:
             cd backend
             npm install
             npm run test
-            
+      - slack/notify:
+           event: pass
+           template: success_tagged_deploy_1            
+
   scan-frontend:
     docker:
       - image: << pipeline.parameters.image_node >>
@@ -335,6 +338,8 @@ workflows:
           requires: [build-frontend]
       - test-backend:
           requires: [build-backend]
+          context:
+            - slack-config
       - scan-backend:
           requires: [build-backend]
           context:
