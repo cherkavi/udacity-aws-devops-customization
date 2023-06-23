@@ -8,7 +8,9 @@ parameters:
   image_node:
     # https://hub.docker.com/r/cimg/node/tags
     type: string
-    default: "circleci/node:13.8.0"
+    # curl: (60) SSL certificate problem: certificate has expired
+    # default: "circleci/node:13.8.0"
+    default: "circleci/node:16.20.1"
   image_ansible:
     type: string
     default: "alpinelinux/ansible:latest"
